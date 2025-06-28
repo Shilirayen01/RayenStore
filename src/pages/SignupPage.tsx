@@ -1,16 +1,16 @@
-// src/pages/SignupPage.tsx (Modified for precise Supabase column mapping)
-
+// src/pages/SignupPage.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { addClient } from '../services/clientService';
 import { useAuth } from '../AuthContext';
-import { addClient } from '../services/clientService'; // Ensure this service is correctly implemented
+import { supabase } from '../config/supabaseClient';
 
 const SignupPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const { signup } = useAuth();
   const navigate = useNavigate();
-  const { signup } = useAuth(); // Removed 'user' from destructuring as it's not immediately available/needed here after signup call
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,27 +21,24 @@ const SignupPage: React.FC = () => {
     }
 
     try {
-      // Perform Supabase signup (creates user in auth.users table)
-      const { user } = await signup(email, password);
+      const { data, error } = await supabase.auth.signUp({ email, password });
 
-      if (user) {
-        // Add client data to the 'clients' table
-        // We initialize with default values for name, firstName, dob, receiveNewsletter
-        // as we are not collecting them on the signup form to maintain style.
-        await addClient({
-          id: user.id, // Supabase user ID
-          name: '', // Default empty string for 'name'
-          firstName: '', // Default empty string for 'firstName'
-          receiveNewsletter: false, // Default false for 'receiveNewsletter'
-          dob: null, // Default null for 'dob' (assuming it's nullable int4 or date)
-          civility:""
-        });
+      if (error) {
+        alert("Erreur d'inscription : " + error.message);
+        return;
       }
 
-      alert("Compte créé ! Veuillez vous connecter.");
-      navigate('/login');
-    } catch (error: any) {
-      alert("Erreur d'inscription : " + error.message);
+      if (data.user) {
+        await addClient({
+          auth_id: data.user.id,
+          email,
+        });
+
+        alert("Compte créé avec succès ! Veuillez vérifier votre email.");
+        navigate('/login');
+      }
+    } catch (err: any) {
+      alert("Erreur : " + err.message);
     }
   };
 

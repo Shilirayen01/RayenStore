@@ -12,4 +12,4 @@ if (!supabaseUrl || !supabaseAnonKey) {
   // For example, throw new Error("Supabase credentials are not configured.");
 }
 
-export const supabase = createClient(supabaseUrl as string, supabaseAnonKey as string);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);

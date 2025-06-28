@@ -33,11 +33,17 @@ export interface Client {
   receiveNewsletter: boolean;
   civility: string;
 }
+
+export interface User {
+  auth_id: string;
+  email: string;
+}
 export interface FavoriteWithProduct {
   product_id: number;
   user_id: string;
   products: Product;
 }
+
 
 // NEW: Order interface, moved here as planned
 export interface Order {

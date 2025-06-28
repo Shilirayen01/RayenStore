@@ -4,18 +4,32 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
+import { getClientByAuthId } from '../config/clientService';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
   const { login } = useAuth();
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+  
     try {
-      await login(email, password);
-      navigate('/admin');
+      const { user } = await login(email, password); // Adjust login to return user
+  
+      if (!user) {
+        alert("Impossible de récupérer l'utilisateur.");
+        return;
+      }
+  
+      const role = await getClientByAuthId(user.id);
+  
+      if (role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
+  
     } catch (error: any) {
       alert('Erreur de connexion : ' + error.message);
     }

@@ -1,39 +1,75 @@
-// src/components/ProductForm.tsx
-import React, { useState } from 'react';
-import { Product, Category } from '../types'; // Assurez-vous que le chemin est correct pour votre types.ts
+import React, { useState, useEffect } from 'react';
+import { Product, Category } from '../types'; // ✅ adjust path if needed
 
 interface ProductFormProps {
   product: Product | null;
   onSubmit: (product: Product | Omit<Product, 'id'>) => void;
   onCancel: () => void;
-  categories: Category[]; // Pour la liste déroulante des catégories
+  categories: Category[];
+  productss: Product[]; // ✅ Add this line
+
 }
 
-const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel, categories }) => {
-  const [name, setName] = useState(product ? product.name : '');
-  const [category, setCategory] = useState(product ? product.category : categories[0]?.id || '');
-  const [price, setPrice] = useState(product ? product.price : 0);
-  const [image, setImage] = useState(product ? product.image : '');
-  const [rating, setRating] = useState(product ? product.rating : 0);
-  const [description, setDescription] = useState(product ? product.description : '');
-  const [brand, setBrand] = useState(product ? product.brand : '');
-  const [sizes, setSizes] = useState(product?.sizes ? product.sizes.join(', ') : '');
+const ProductForm: React.FC<ProductFormProps> = ({
+  product,
+  onSubmit,
+  onCancel,
+  categories,
+}) => {
+  const [name, setName] = useState('');
+  const [category, setCategory] = useState('');
+  const [price, setPrice] = useState(0);
+  const [image, setImage] = useState('');
+  const [rating, setRating] = useState(0);
+  const [description, setDescription] = useState('');
+  const [brand, setBrand] = useState('');
+  const [sizes, setSizes] = useState('');
+  const [stock, setStock] = useState(0);
+
+  // 🔁 Hydrate state on edit mode
+  useEffect(() => {
+    if (product) {
+      setName(product.name);
+      setCategory(product.category);
+      setPrice(product.price);
+      setImage(product.image);
+      setRating(product.rating || 0);
+      setDescription(product.description || '');
+      setBrand(product.brand || '');
+      setStock(product.stock || 0);
+      setSizes(Array.isArray(product.sizes) ? product.sizes.join(', ') : '');
+    } else {
+      setName('');
+      setCategory(categories[0]?.name || '');
+      setPrice(0);
+      setImage('');
+      setRating(0);
+      setDescription('');
+      setBrand('');
+      setStock(0);
+      setSizes('');
+    }
+  }, [product, categories]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const newOrUpdatedProduct: Omit<Product, 'id'> & { id?: number } = {
       name,
       category,
-      price: parseFloat(price.toString()), // Assurer que le prix est un nombre
+      price: parseFloat(price.toString()),
       image,
-      rating: parseFloat(rating.toString()), // Assurer que le rating est un nombre
+      rating: parseFloat(rating.toString()),
       description,
       brand,
-      sizes: sizes.split(',').map(s => s.trim()).filter(s => s !== ''),
+      stock,
+      sizes: sizes
+        .split(',')
+        .map((s) => s.trim())
+        .filter((s) => s !== ''),
     };
 
     if (product && product.id !== undefined) {
-      newOrUpdatedProduct.id = product.id; // Garder l'ID pour la mise à jour
+      newOrUpdatedProduct.id = product.id;
     }
 
     onSubmit(newOrUpdatedProduct as Product | Omit<Product, 'id'>);
@@ -46,7 +82,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel, 
       </h5>
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
-          <label htmlFor="name" className="form-label">Nom du Produit</label>
+          <label htmlFor="name" className="form-label">
+            Nom du Produit
+          </label>
           <input
             type="text"
             className="form-control"
@@ -56,28 +94,31 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel, 
             required
           />
         </div>
+
         <div className="mb-3">
-          <label htmlFor="category" className="form-label">Catégorie</label>
-         <select
-  className="form-select"
-  id="category"
-  value={category}
-  onChange={(e) => setCategory(e.target.value)} // ← string
->
-  <option value="">-- Choisir une catégorie --</option>
-  {categories.map((cat) => (
-    <option key={cat.id} value={cat.name}> {/* ← name est une string */}
-      {cat.name}
-    </option>
-  ))}
-</select>
-
-
-
-
+          <label htmlFor="category" className="form-label">
+            Catégorie
+          </label>
+          <select
+            className="form-select"
+            id="category"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            required
+          >
+            <option value="">-- Choisir une catégorie --</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.name}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
         </div>
+
         <div className="mb-3">
-          <label htmlFor="price" className="form-label">Prix (€)</label>
+          <label htmlFor="price" className="form-label">
+            Prix (€)
+          </label>
           <input
             type="number"
             step="0.01"
@@ -88,8 +129,11 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel, 
             required
           />
         </div>
+
         <div className="mb-3">
-          <label htmlFor="image" className="form-label">URL de l'Image</label>
+          <label htmlFor="image" className="form-label">
+            URL de l'Image
+          </label>
           <input
             type="text"
             className="form-control"
@@ -99,8 +143,11 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel, 
             placeholder="Ex: https://placehold.co/400x300"
           />
         </div>
+
         <div className="mb-3">
-          <label htmlFor="rating" className="form-label">Note (0-5)</label>
+          <label htmlFor="rating" className="form-label">
+            Note (0-5)
+          </label>
           <input
             type="number"
             step="0.1"
@@ -113,8 +160,11 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel, 
             required
           />
         </div>
+
         <div className="mb-3">
-          <label htmlFor="description" className="form-label">Description</label>
+          <label htmlFor="description" className="form-label">
+            Description
+          </label>
           <textarea
             className="form-control"
             id="description"
@@ -124,8 +174,11 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel, 
             required
           ></textarea>
         </div>
+
         <div className="mb-3">
-          <label htmlFor="brand" className="form-label">Marque</label>
+          <label htmlFor="brand" className="form-label">
+            Marque
+          </label>
           <input
             type="text"
             className="form-control"
@@ -135,8 +188,25 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel, 
             required
           />
         </div>
+
         <div className="mb-3">
-          <label htmlFor="sizes" className="form-label">Tailles (séparées par des virgules)</label>
+          <label htmlFor="stock" className="form-label">
+            Stock
+          </label>
+          <input
+            type="number"
+            className="form-control"
+            id="stock"
+            value={stock}
+            onChange={(e) => setStock(parseInt(e.target.value))}
+            required
+          />
+        </div>
+
+        <div className="mb-3">
+          <label htmlFor="sizes" className="form-label">
+            Tailles (séparées par des virgules)
+          </label>
           <input
             type="text"
             className="form-control"
@@ -146,6 +216,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel, 
             placeholder="Ex: S, M, L, XL ou 38, 39, 40"
           />
         </div>
+
         <div className="d-flex justify-content-end">
           <button type="button" className="btn btn-secondary me-2" onClick={onCancel}>
             Annuler

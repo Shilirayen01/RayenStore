@@ -2,18 +2,12 @@
 import React from 'react';
 import { Table, Button, Modal, Image, Alert, Pagination, Card } from 'react-bootstrap';
 import { useOutletContext } from 'react-router-dom'; // Pour récupérer le contexte de l'Outlet
+import ProductForm from '../ProductForm'; // adjust path if needed
+import { Product, Category } from '../../types'; // Adjust path if needed
 
-// Définis tes types, ou utilise des types génériques si tu ne les as pas encore
-interface Product {
-    id: number;
-    name: string;
-    category: string;
-    price: number;
-    image: string;
-    rating?: number; // Optionnel
-    stock?: number; // Optionnel
-    brand?: string; // Optionnel
-}
+
+
+
 
 // Le contexte qui sera passé de AdminLayout
 interface AdminOutletContext {
@@ -21,8 +15,10 @@ interface AdminOutletContext {
     addProduct: (product: Omit<Product, 'id'>) => void;
     updateProduct: (product: Product) => void;
     deleteProduct: (id: number) => void;
-    categories: any[]; // Remplace 'any' par ton type Category
-}
+    categories: Category[];
+    productss: Product[]; // ✅ Add this line
+
+  }
 
 const InventoryPage: React.FC = () => {
     // Récupère les données et fonctions du contexte de l'Outlet
@@ -47,7 +43,7 @@ const InventoryPage: React.FC = () => {
     const handleEdit = (product: Product) => {
         setEditingProduct(product);
         setShowProductForm(true);
-    };
+      };
 
     const handleDeleteClick = (id: number) => {
         setProductIdToDelete(id);
@@ -67,15 +63,16 @@ const InventoryPage: React.FC = () => {
         setProductIdToDelete(null);
     };
 
-    const handleFormSubmit = (product: Product | Omit<Product, 'id'>) => {
+    const handleFormSubmit = async (product: Product | Omit<Product, 'id'>) => {
         if ('id' in product && product.id !== undefined) {
-            updateProduct(product as Product);
+          await updateProduct(product as Product);
         } else {
-            addProduct(product as Omit<Product, 'id'>);
+          await addProduct(product as Omit<Product, 'id'>);
         }
         setEditingProduct(null);
         setShowProductForm(false);
-    };
+      };
+      
 
     const handleCancelEdit = () => {
         setEditingProduct(null);
@@ -112,11 +109,15 @@ const InventoryPage: React.FC = () => {
                                 onCancel={handleCancelEdit}
                                 categories={categories}
                             /> */}
-                            <Alert variant="warning">
-                                **ProductForm Placeholder:** Intègre ici ton `ProductForm` existant.
-                                Il doit accepter `product`, `onSubmit`, `onCancel`, et `categories`.
-                                <Button variant="secondary" className="ms-3" onClick={handleCancelEdit}>Close Form</Button>
-                            </Alert>
+<ProductForm
+  product={editingProduct}
+  onSubmit={handleFormSubmit}
+  onCancel={handleCancelEdit}
+  categories={categories}
+    productss={products} // ✅ Add this line
+
+/>
+
                         </div>
                     )}
 
@@ -134,7 +135,6 @@ const InventoryPage: React.FC = () => {
                                 <Table striped bordered hover className="mt-3">
                                     <thead className="table-primary">
                                         <tr>
-                                            <th>Thumbnail</th>
                                             <th>Title</th>
                                             <th>Price</th>
                                             <th>Category</th>
@@ -144,16 +144,7 @@ const InventoryPage: React.FC = () => {
                                     <tbody>
                                         {currentProducts.map(product => (
                                             <tr key={product.id}>
-                                                <td>
-                                                    <Image
-                                                        src={product.image || "https://via.placeholder.com/50"}
-                                                        alt={product.name}
-                                                        style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '8px' }}
-                                                        onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-                                                            e.currentTarget.src = "https://via.placeholder.com/50?text=No+Img"; // Fallback image
-                                                        }}
-                                                    />
-                                                </td>
+
                                                 <td>{product.name}</td>
                                                 <td>${product.price ? product.price.toFixed(2) : 'N/A'}</td>
                                                 <td>{product.category}</td>

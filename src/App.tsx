@@ -40,6 +40,7 @@ import { clients as initialClientsData } from './data/clients';
 // IMPORTE TOUS TES TYPES DEPUIS TON FICHIER types/index.ts
 // Assure-toi que toutes ces interfaces sont bien exportées depuis src/types/index.ts
 import { Product, Category, CartItem, Client, Order } from './types/index'; // Chemin corrigé pour src/types/index.ts et import de Order
+import { getClientByAuthId } from './config/clientService';
 
 // Données de commandes de démonstration (à remplacer par tes vraies données si tu as un service de commandes)
 const initialOrdersData: Order[] = [
@@ -199,17 +200,25 @@ function AppContent() {
 }
 
 const PrivateRoute: React.FC<{ children: JSX.Element }> = ({ children }) => {
-  const { user, loading } = useAuth(); // Destructure user and loading from useAuth()
+  const { user, loading } = useAuth();
+  const [role, setRole] = useState<string | null>(null);
+  const [checkingRole, setCheckingRole] = useState(true);
 
-  // FIX: Determine authentication status
-  const isAuthenticated = !loading && user !== null;
+  useEffect(() => {
+    const fetchRole = async () => {
+      if (user?.id) {
+        const userRole = await getClientByAuthId(user.id);
+        setRole(userRole);
+      }
+      setCheckingRole(false);
+    };
 
-  const adminEmail = 'admin@rayenstore.com'; // Change here if you want another email
+    fetchRole();
+  }, [user]);
 
-  // FIX: Check if authenticated AND user email matches adminEmail
-  return isAuthenticated && user?.email === adminEmail
-    ? children
-    : <Navigate to="/login" replace />;
+  if (loading || checkingRole) return <p>Chargement...</p>;
+
+  return user && role === 'admin' ? children : <Navigate to="/login" replace />;
 };
 
 

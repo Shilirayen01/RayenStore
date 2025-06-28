@@ -1,6 +1,6 @@
 // src/components/Administration/AdminDashboard.tsx
 import React, { useState } from 'react';
-import { Product, Category, User } from '../../types';
+import { Product, Category } from '../../types';
 import { clients } from '../../data/clients';
 import ProductForm from '../ProductForm';
 import AdminSidebar from './AdminSidebar';
@@ -9,9 +9,9 @@ import { useNavigate } from 'react-router-dom';
 
 interface AdminDashboardProps {
   products: Product[];
-  addProduct: (product: Omit<Product, 'id'>) => void;
-  updateProduct: (product: Product) => void;
-  deleteProduct: (id: number) => void;
+  addProduct: (product: Omit<Product, 'id'>) => Promise<void>;
+  updateProduct: (product: Product) => Promise<void>;
+  deleteProduct: (id: number) => Promise<void>;
   categories: Category[];
 }
 
@@ -46,9 +46,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     setShowConfirmModal(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (productIdToDelete !== null) {
-      deleteProduct(productIdToDelete);
+      await deleteProduct(productIdToDelete);
     }
     setShowConfirmModal(false);
     setProductIdToDelete(null);
@@ -59,14 +59,18 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     setProductIdToDelete(null);
   };
 
-  const handleFormSubmit = (product: Product | Omit<Product, 'id'>) => {
-    if ('id' in product && product.id !== undefined) {
-      updateProduct(product as Product);
-    } else {
-      addProduct(product as Omit<Product, 'id'>);
+  const handleFormSubmit = async (product: Product | Omit<Product, 'id'>) => {
+    try {
+      if ('id' in product && product.id !== undefined) {
+        await updateProduct(product as Product);
+      } else {
+        await addProduct(product as Omit<Product, 'id'>);
+      }
+      setEditingProduct(null);
+      setShowProductForm(false);
+    } catch (error) {
+      console.error("Erreur lors de la soumission du produit:", error);
     }
-    setEditingProduct(null);
-    setShowProductForm(false);
   };
 
   const handleCancelEdit = () => {
@@ -160,9 +164,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                               objectFit: 'cover',
                               borderRadius: '8px',
                             }}
-                            onError={(e) => {
-                              e.currentTarget.src = "https://placehold.co/50x50/CCCCCC/FFFFFF?text=No+Img";
-                            }}
+                            
                           />
                         </td>
                         <td>{product.name}</td>

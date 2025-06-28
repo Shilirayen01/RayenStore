@@ -8,8 +8,11 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   login: (email: string, password: string) => Promise<{ user: User | null; session: Session | null }>;
-  signup: (email: string, password: string) => Promise<{ user: User | null; session: Session | null }>;
-  logout: () => Promise<void>;
+  signup: (
+    email: string,
+    password: string
+  ) => Promise<{ data: { user: User | null; session: Session | null } | null; error: any }>;
+    logout: () => Promise<void>;
   loading: boolean; // FIX: Added 'loading' property here
 }
 
@@ -42,30 +45,31 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   const login = async (email: string, password: string) => {
-    setLoading(true); // Set loading to true during login attempt
+    setLoading(true);
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
       setUser(data.user);
       setSession(data.session);
-      return { user: data.user, session: data.session };
+      return { user: data.user, session: data.session }; // ✅ Return user for use in LoginPage
     } finally {
-      setLoading(false); // Always set loading to false when done
+      setLoading(false);
     }
   };
 
   const signup = async (email: string, password: string) => {
-    setLoading(true); // Set loading to true during signup attempt
+    setLoading(true);
     try {
       const { data, error } = await supabase.auth.signUp({ email, password });
-      if (error) throw error;
-      setUser(data.user); // user might be null here if email confirmation is required
+      if (error) return { data: null, error }; // ✅ Include error explicitly
+      setUser(data.user);
       setSession(data.session);
-      return { user: data.user, session: data.session };
+      return { data, error: null }; // ✅ Include data + error
     } finally {
-      setLoading(false); // Always set loading to false when done
+      setLoading(false);
     }
   };
+  
 
   const logout = async () => {
     setLoading(true); // Set loading to true during logout attempt
