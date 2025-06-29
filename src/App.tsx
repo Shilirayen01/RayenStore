@@ -1,12 +1,11 @@
-// src/App.tsx
 import './App.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom'; // Removed useOutletContext as it's used by children
+import { Routes, Route, Navigate } from 'react-router-dom';
 
-// Tes composants existants
+// Pages & Components
 import ClientPage from './pages/ClientPage';
 import Contact from './components/Contact';
 import LoginPage from './pages/LoginPage';
@@ -19,46 +18,44 @@ import FavorisPage from './pages/FavorisPage';
 import PrivacyPage from './pages/PrivacyPage';
 import AboutPage from './pages/about';
 
-// Tes imports Supabase pour les produits
-import { fetchProducts, addProduct as addProductToSupabase, updateProduct as updateProductInSupabase, deleteProduct as deleteProductFromSupabase } from './services/productService';
-
-// Ton contexte d'authentification
-import { AuthProvider, useAuth } from './AuthContext';
-
-// Les nouveaux composants du panneau d'administration AVEC LE CHEMIN CORRIGÉ
+// Admin components
 import AdminLayout from './components/Administartion/AdminLayout';
 import DashboardOverview from './components/Administartion/DashboardOverview';
 import InventoryPage from './components/Administartion/InventoryPage';
 import OrdersPage from './components/Administartion/OrdersPage';
 import CustomersPage from './components/Administartion/CustomersPage';
 
-// Importe les données clients (NOTE: Assure-toi que les données dans ce fichier sont de type Client[])
-// Tu auras besoin d'un fichier src/data/clients.ts ou .json qui exporte un tableau de 'Client'.
-// Par exemple: export const clients: Client[] = [{ id: 'some-uuid', name: 'John', ... }];
-import { clients as initialClientsData } from './data/clients';
+// Supabase services
+import {
+  fetchProducts,
+  addProduct as addProductToSupabase,
+  updateProduct as updateProductInSupabase,
+} from './services/productService';
+import { supabase } from './config/supabaseClient';
 
-// IMPORTE TOUS TES TYPES DEPUIS TON FICHIER types/index.ts
-// Assure-toi que toutes ces interfaces sont bien exportées depuis src/types/index.ts
-import { Product, Category, CartItem, Client, Order } from './types/index'; // Chemin corrigé pour src/types/index.ts et import de Order
+// Auth
+import { AuthProvider, useAuth } from './AuthContext';
 import { getClientByAuthId } from './config/clientService';
 
-// Données de commandes de démonstration (à remplacer par tes vraies données si tu as un service de commandes)
+// Types
+import { Product, Category, CartItem, Client, Order } from './types/index';
+import { clients as initialClientsData } from './data/clients';
+
 const initialOrdersData: Order[] = [
-  { id: 1, customerName: 'Alice Dupont', date: '2024-06-20', status: 'Completed', totalAmount: 185.50 },
-  { id: 2, customerName: 'Bob Martin', date: '2024-06-19', status: 'Pending', totalAmount: 75.00 },
+  { id: 1, customerName: 'Alice Dupont', date: '2024-06-20', status: 'Completed', totalAmount: 185.5 },
+  { id: 2, customerName: 'Bob Martin', date: '2024-06-19', status: 'Pending', totalAmount: 75.0 },
   { id: 3, customerName: 'Charlie Leblanc', date: '2024-06-18', status: 'Cancelled', totalAmount: 220.75 },
   { id: 4, customerName: 'Diana Roussou', date: '2024-06-17', status: 'Completed', totalAmount: 45.99 },
-  { id: 5, customerName: 'Eve Richard', date: '2024-06-16', status: 'Pending', totalAmount: 310.00 },
+  { id: 5, customerName: 'Eve Richard', date: '2024-06-16', status: 'Pending', totalAmount: 310.0 },
 ];
 
-// Définit l'interface du contexte qui sera passé via Outlet
 export interface AdminOutletContextType {
   products: Product[];
-  addProduct: (product: Omit<Product, 'id'>) => Promise<Product | undefined>; // Updated to reflect async nature and return type
-  updateProduct: (product: Product) => Promise<void>; // Updated to reflect async nature
-  deleteProduct: (id: number) => Promise<void>; // Updated to reflect async nature
+  addProduct: (product: Omit<Product, 'id'>) => Promise<Product | undefined>;
+  updateProduct: (product: Product) => Promise<void>;
+  deleteProduct: (id: number) => Promise<void>;
   categories: Category[];
-  clients: Client[]; // FIX: Changed from User[] to Client[]
+  clients: Client[];
   orders: Order[];
   totalOrders: number;
   totalInventory: number;
@@ -66,15 +63,14 @@ export interface AdminOutletContextType {
   totalRevenue: number;
 }
 
-
 function AppContent() {
   const [products, setProducts] = useState<Product[]>([]);
   const [favorites, setFavorites] = useState<Product[]>([]);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [orders, setOrders] = useState<Order[]>(initialOrdersData);
-  const [clients, setClients] = useState<Client[]>(initialClientsData); // FIX: Changed from User[] to Client[]
+  const [clients, setClients] = useState<Client[]>(initialClientsData);
 
-  const [categories, setCategories] = useState<Category[]>([
+  const [categories] = useState<Category[]>([
     { id: 'crampons', name: 'Crampons', icon: 'bi-award' },
     { id: 'tenues', name: 'Tenues', icon: 'bi-person' },
     { id: 'ballons', name: 'Ballons', icon: 'bi-circle' },
@@ -86,7 +82,7 @@ function AppContent() {
         const fetched = await fetchProducts();
         setProducts(fetched);
       } catch (error) {
-        console.error("Erreur chargement produits:", error);
+        console.error('Erreur chargement produits:', error);
       }
     };
     loadProducts();
@@ -96,9 +92,9 @@ function AppContent() {
     try {
       const newProduct = await addProductToSupabase(product);
       setProducts(prev => [...prev, newProduct]);
-      return newProduct; // Return the new product
+      return newProduct;
     } catch (error) {
-      console.error("Erreur ajout produit:", error);
+      console.error('Erreur ajout produit:', error);
       return undefined;
     }
   };
@@ -106,42 +102,47 @@ function AppContent() {
   const updateProduct = async (product: Product) => {
     try {
       await updateProductInSupabase(product);
-      setProducts(prev => prev.map(p => p.id === product.id ? product : p));
+      setProducts(prev => prev.map(p => (p.id === product.id ? product : p)));
     } catch (error) {
-      console.error("Erreur mise à jour:", error);
+      console.error('Erreur mise à jour:', error);
     }
   };
 
-  const deleteProduct = async (id: number) => {
+  const deleteProduct = async (id: number): Promise<void> => {
     try {
-      await deleteProductFromSupabase(id);
+      const { error: cartError } = await supabase.from('cart').delete().eq('product_id', id);
+      if (cartError) throw cartError;
+
+      const { error: favError } = await supabase.from('favorites').delete().eq('product_id', id);
+      if (favError) throw favError;
+
+      const { error: productError } = await supabase.from('products').delete().eq('id', id);
+      if (productError) throw productError;
+
       setProducts(prev => prev.filter(p => p.id !== id));
     } catch (error) {
-      console.error("Erreur suppression:", error);
+      console.error('Erreur suppression:', error);
     }
   };
 
-  // Calcul des statistiques pour le Dashboard Overview
   const totalOrdersCount = orders.length;
   const totalInventoryCount = products.reduce((sum, product) => sum + (product.stock || 0), 0);
   const totalCustomersCount = clients.length;
   const totalRevenueAmount = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
 
-  // Valeurs du contexte de l'Outlet pour les pages du dashboard
   const adminOutletContextValue: AdminOutletContextType = {
     products,
     addProduct,
     updateProduct,
     deleteProduct,
     categories,
-    clients, // Now of type Client[]
+    clients,
     orders,
     totalOrders: totalOrdersCount,
     totalInventory: totalInventoryCount,
     totalCustomers: totalCustomersCount,
     totalRevenue: totalRevenueAmount,
   };
-
 
   return (
     <Routes>
@@ -177,19 +178,15 @@ function AppContent() {
           />
         }
       />
-      {/* Route parente pour le panneau d'administration */}
       <Route
         path="/admin"
         element={
           <PrivateRoute>
-            {/* AdminLayout reçoit les fonctions et données via son Outlet context */}
-            {/* IMPORTANT: AdminLayout.tsx must render <Outlet context={props.context} /> */}
             <AdminLayout context={adminOutletContextValue} />
           </PrivateRoute>
         }
       >
-        {/* Les routes enfants du dashboard, elles utiliseront useOutletContext pour accéder aux données */}
-        <Route index element={<DashboardOverview />} /> {/* Route par défaut pour /admin */}
+        <Route index element={<DashboardOverview />} />
         <Route path="dashboard" element={<DashboardOverview />} />
         <Route path="inventory" element={<InventoryPage />} />
         <Route path="orders" element={<OrdersPage />} />
@@ -220,7 +217,6 @@ const PrivateRoute: React.FC<{ children: JSX.Element }> = ({ children }) => {
 
   return user && role === 'admin' ? children : <Navigate to="/login" replace />;
 };
-
 
 function App() {
   return (

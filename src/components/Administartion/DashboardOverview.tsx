@@ -88,7 +88,7 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = () => {
                     <Card className="shadow-sm text-center">
                         <Card.Body>
                             <i className="bi bi-box-seam-fill text-info fs-2 mb-2"></i>
-                            <Card.Title className="text-muted small text-uppercase">Total Inventory</Card.Title>
+                            <Card.Title className="text-muted small text-uppercase">Total Products</Card.Title>
                             <Card.Text className="fs-3 fw-bold">{demoTotalInventory.toLocaleString()}</Card.Text>
                         </Card.Body>
                     </Card>
@@ -102,15 +102,7 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = () => {
                         </Card.Body>
                     </Card>
                 </Col>
-                <Col md={3} sm={6} className="mb-3">
-                    <Card className="shadow-sm text-center">
-                        <Card.Body>
-                            <i className="bi bi-currency-dollar text-danger fs-2 mb-2"></i>
-                            <Card.Title className="text-muted small text-uppercase">Total Revenue</Card.Title>
-                            <Card.Text className="fs-3 fw-bold">${demoTotalRevenue.toLocaleString()}</Card.Text>
-                        </Card.Body>
-                    </Card>
-                </Col>
+                
             </Row>
 
             {/* Graphique de Revenus */}

@@ -117,8 +117,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 product={editingProduct}
                 onSubmit={handleFormSubmit}
                 onCancel={handleCancelEdit}
-                categories={categories}
-              />
+                categories={categories} productss={[]}              />
             )}
 
             <hr className="my-4" />

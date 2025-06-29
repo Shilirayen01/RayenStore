@@ -27,8 +27,12 @@ const FavorisPage: React.FC<FavorisPageProps> = ({
   useEffect(() => {
     const fetchFavorites = async () => {
       if (user) {
-        const favs = await getFavorites(user.id);
-        setFavorites(favs);
+        try {
+          const favs = await getFavorites(user.id);
+          setFavorites(favs);
+        } catch (err) {
+          console.error('Erreur lors du chargement des favoris :', err);
+        }
       }
     };
     fetchFavorites();
@@ -50,8 +54,12 @@ const FavorisPage: React.FC<FavorisPageProps> = ({
 
   const handleRemoveFavorite = async (productId: number) => {
     if (!user) return;
-    await removeFavorite(user.id, productId);
-    setFavorites(prev => prev.filter(product => product.id !== productId));
+    try {
+      await removeFavorite(user.id, productId);
+      setFavorites(prev => prev.filter(product => product.id !== productId));
+    } catch (err) {
+      console.error('Erreur lors de la suppression du favori :', err);
+    }
   };
 
   const onCartToggle = () => {
@@ -68,7 +76,12 @@ const FavorisPage: React.FC<FavorisPageProps> = ({
         favoritesCount={favorites.length}
       />
 
-      <div className={`modal fade ${showCartModal ? 'show d-block' : ''}`} tabIndex={-1} role="dialog" aria-hidden={!showCartModal}>
+      <div
+        className={`modal fade ${showCartModal ? 'show d-block' : ''}`}
+        tabIndex={-1}
+        role="dialog"
+        aria-hidden={!showCartModal}
+      >
         <div className="modal-dialog" role="document">
           <div className="modal-content">
             <div className="modal-header">

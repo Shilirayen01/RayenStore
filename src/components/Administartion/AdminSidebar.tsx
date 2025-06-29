@@ -40,7 +40,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ onFilterCategory }) => {
               "nav-link text-white" + (isActive ? " active fw-bold bg-secondary rounded" : "")
             }
           >
-            <i className="bi bi-box-seam-fill me-2"></i>Inventory
+            <i className="bi bi-box-seam-fill me-2"></i>Products
           </NavLink>
         </li>
         <li className="nav-item mb-2">

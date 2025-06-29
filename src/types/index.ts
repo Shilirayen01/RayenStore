@@ -11,6 +11,7 @@ export interface Product {
   brand: string;
   sizes?: string[]; // Les tailles sont optionnelles
   stock: number;
+  Images?: string[];
 }
 
 export interface CartItem {
