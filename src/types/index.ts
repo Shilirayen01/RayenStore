@@ -55,3 +55,23 @@ export interface Order {
   totalAmount: number;
   // Add other order properties as needed
 }
+interface OrderItem {
+  product_id: number;
+  name: string;
+  quantity: number;
+  price: number;
+}
+
+interface AppOrder {
+  id: string;
+  user_id: number;
+  items: OrderItem[];
+  total: number;
+  status: string;
+  created_at: string;
+}
+
+interface AppClient {
+  id: number;
+  email: string;
+}

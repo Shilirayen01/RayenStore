@@ -1,11 +1,22 @@
 // src/services/clientService.ts
 import { supabase } from '../config/supabaseClient';
-import { User } from '../types';
 
-export async function addClient(user: User): Promise<void> {
-  const { error } = await supabase.from('clients').insert([user]);
+interface MinimalUser {
+  auth_id: string;
+  email: string;
+}
+
+export async function addClient(user: MinimalUser): Promise<void> {
+  const { error } = await supabase.from('clients').insert([
+    {
+      id: user.auth_id,    
+      auth_id: user.auth_id,
+      email: user.email,
+    },
+  ]);
+
   if (error) {
-    console.error('Error adding client:', error.message); 
-    throw error;
+    console.error('Erreur ajout client:', error.message);
+    throw new Error('Erreur ajout client: ' + error.message);
   }
 }

@@ -289,9 +289,10 @@ const ClientPage: React.FC<ClientPageProps> = ({
                   <button
                     className="btn btn-success w-100 mt-2 py-2 rounded-pill"
                     onClick={() => {
-                      navigate('/checkout');
+                      navigate('/payment');
                       setCartVisible(false);
                     }}
+                    
                   >
                     Valider mon panier
                   </button>

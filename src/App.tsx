@@ -17,6 +17,8 @@ import ProductList from './components/ProductList';
 import FavorisPage from './pages/FavorisPage';
 import PrivacyPage from './pages/PrivacyPage';
 import AboutPage from './pages/about';
+import PaymentPage from './pages/PaymentPage';
+import MyOrdersPage from './pages/MyOrdersPage';
 
 // Admin components
 import AdminLayout from './components/Administartion/AdminLayout';
@@ -166,7 +168,14 @@ function AppContent() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="/privacy" element={<PrivacyPage />} />
+      <Route path="/mes-commandes" element={<MyOrdersPage />} />
+
       <Route path="/product/:id" element={<ProductDetail products={products} />} />
+      <Route path="/payment" element={
+      <PaymentPage cartItems={cartItems} setCartItems={setCartItems} />
+      
+} />
+
       <Route
         path="/favoris"
         element={

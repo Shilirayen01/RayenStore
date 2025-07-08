@@ -47,9 +47,16 @@ const Header: React.FC<HeaderProps> = ({
             <FavoritesButton count={favoritesCount} />
 
             <CartButton cartItems={cartItems} onClick={onCartToggle} />
+            <li className="nav-item">
+            <Link to="/mes-commandes" className="btn btn-outline-light btn-sm">
+            <i className="bi bi-box-seam me-1"></i> Mes commandes
+            </Link>
+
+</li>
+
 
             <Link to="/login" className="btn btn-light btn-sm">
-              <i className="bi bi-box-arrow-in-right me-1"></i>Login
+              <i className="bi bi-box-arrow-in-right me-1"></i>Se Connecter
             </Link>
           </div>
         </div>
